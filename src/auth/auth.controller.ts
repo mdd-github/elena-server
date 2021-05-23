@@ -3,6 +3,7 @@ import { IApplicationResponse } from '../common/application-response.interface';
 import { RegisterDto } from './dto/register.dto';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
+import { RefreshDto } from "./dto/refresh.dto";
 
 @Controller('auth')
 export class AuthController {
@@ -35,5 +36,19 @@ export class AuthController {
           success: false,
           payload: result,
         };
+  }
+
+  @Post('refresh')
+  async refresh(@Body() data: RefreshDto): Promise<IApplicationResponse> {
+    const result = await this.authService.refresh(data);
+    return result.constructor.name == 'LoginSuccessResultDto'
+      ? {
+        success: true,
+        payload: result,
+      }
+      : {
+        success: false,
+        payload: result,
+      };
   }
 }

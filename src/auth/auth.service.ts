@@ -18,6 +18,13 @@ import {
 import { UserEntity } from '../user/user.entity';
 import { JsonWebTokenService } from '../json-web-token/json-web-token.service';
 import { SessionService } from '../session/session.service';
+import {
+  RefreshDto,
+  RefreshFailureResultDto,
+  RefreshResultDto,
+} from './dto/refresh.dto';
+import { INCORRECT_SESSION_ERROR } from '../session/errors/incorrect-session.error';
+import { SESSION_EXPIRED_ERROR } from '../session/errors/session-expired.error';
 
 @Injectable()
 export class AuthService {
@@ -86,8 +93,40 @@ export class AuthService {
     result.id = foundUser.id;
     result.role = foundUser.role;
     result.token = token;
-    result.refresh = session;
+    result.refresh = session.id;
     return result;
+  }
+
+  async refresh(data: RefreshDto): Promise<RefreshResultDto> {
+    try {
+      const session = await this.sessionService.refresh({
+        session: data.refresh,
+        fingerprint: data.fingerprint,
+      });
+
+      const token = this.signUser(session.user);
+
+      return {
+        id: session.user.id,
+        role: session.user.role,
+        refresh: session.id,
+        token: token,
+      };
+    } catch (e) {
+      const result = new RefreshFailureResultDto();
+      switch (e.name) {
+        case INCORRECT_SESSION_ERROR:
+          result.code = 1;
+          result.message = e.message;
+          return result;
+        case SESSION_EXPIRED_ERROR:
+          result.code = 2;
+          result.message = e.message;
+          return result;
+        default:
+          throw e;
+      }
+    }
   }
 
   signUser(user: UserEntity): string {

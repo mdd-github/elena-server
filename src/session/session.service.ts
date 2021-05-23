@@ -35,27 +35,29 @@ export class SessionService {
     }
   }
 
-  async create(data: CreateDto): Promise<string> {
+  async create(data: CreateDto): Promise<SessionEntity> {
     await this.cleanSessionOfUser(data.user, data.fingerprint);
 
     const expiresAt = new Date();
     expiresAt.setMonth(expiresAt.getMonth() + 1);
 
-    let newSession = new SessionEntity();
+    const newSession = new SessionEntity();
     newSession.fingerprint = data.fingerprint;
     newSession.expiresAt = expiresAt;
     newSession.user = data.user;
-    newSession = await this.sessionsRepository.save(newSession);
 
-    return newSession.id;
+    return await this.sessionsRepository.save(newSession);
   }
 
   async remove(session: string): Promise<void> {
     await this.sessionsRepository.delete(session);
   }
 
-  async refresh(data: RefreshDto): Promise<string> {
-    const session = await this.sessionsRepository.findOne(data.session);
+  async refresh(data: RefreshDto): Promise<SessionEntity> {
+    const session = await this.sessionsRepository.findOne(data.session, {
+      relations: ['user'],
+    });
+
     if (session == null) {
       throw new IncorrectSessionError();
     }
