@@ -22,6 +22,7 @@ import {
   RefreshDto,
   RefreshFailureResultDto,
   RefreshResultDto,
+  RefreshSuccessResultDto,
 } from './dto/refresh.dto';
 import { INCORRECT_SESSION_ERROR } from '../session/errors/incorrect-session.error';
 import { SESSION_EXPIRED_ERROR } from '../session/errors/session-expired.error';
@@ -106,12 +107,12 @@ export class AuthService {
 
       const token = this.signUser(session.user);
 
-      return {
-        id: session.user.id,
-        role: session.user.role,
-        refresh: session.id,
-        token: token,
-      };
+      const result = new RefreshSuccessResultDto();
+      result.id = session.user.id;
+      result.role = session.user.role;
+      result.refresh = session.id;
+      result.token = token;
+      return result;
     } catch (e) {
       const result = new RefreshFailureResultDto();
       switch (e.name) {

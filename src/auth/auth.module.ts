@@ -7,6 +7,7 @@ import { BcryptModule } from '../bcrypt/bcrypt.module';
 import { InviteModule } from '../invite/invite.module';
 import { JsonWebTokenModule } from '../json-web-token/json-web-token.module';
 import { SessionModule } from '../session/session.module';
+import { RefreshCookieInterceptor } from './interceptors/refresh-cookie.interceptor';
 
 @Module({
   imports: [
@@ -17,7 +18,7 @@ import { SessionModule } from '../session/session.module';
     JsonWebTokenModule,
     SessionModule,
   ],
-  providers: [AuthService],
+  providers: [AuthService, RefreshCookieInterceptor],
   controllers: [AuthController],
 })
 export class AuthModule {}
