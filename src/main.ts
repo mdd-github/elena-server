@@ -17,10 +17,10 @@ const applyMiddlewares = (app: INestApplication) => {
 const enableCors = (app: INestApplication) => {
   app.enableCors({
     origin: function (origin, callback) {
-      if (corsWhiteList.indexOf(origin) !== -1) {
+      if (corsWhiteList.indexOf(origin) !== -1 || typeof origin === 'undefined') {
         callback(null, true);
       } else {
-        Logger.log('blocked cors for:' + origin, '[CORS]');
+        Logger.log('blocked cors for: ' + origin, '[CORS]');
         callback(new Error('Not allowed by CORS'));
       }
     },
