@@ -8,6 +8,7 @@ import { InviteModule } from '../invite/invite.module';
 import { JsonWebTokenModule } from '../json-web-token/json-web-token.module';
 import { SessionModule } from '../session/session.module';
 import { RefreshCookieInterceptor } from './interceptors/refresh-cookie.interceptor';
+import { AuthGuard } from './guards/auth.guard';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { RefreshCookieInterceptor } from './interceptors/refresh-cookie.intercep
     JsonWebTokenModule,
     SessionModule,
   ],
-  providers: [AuthService, RefreshCookieInterceptor],
+  providers: [AuthService, RefreshCookieInterceptor, AuthGuard],
   controllers: [AuthController],
 })
 export class AuthModule {}

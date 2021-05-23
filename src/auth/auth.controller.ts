@@ -1,10 +1,11 @@
-import { Body, Controller, Post, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards, UseInterceptors } from "@nestjs/common";
 import { IApplicationResponse } from '../common/application-response.interface';
 import { RegisterDto } from './dto/register.dto';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
 import { RefreshCookieInterceptor } from './interceptors/refresh-cookie.interceptor';
+import { AuthGuard } from "./guards/auth.guard";
 
 @Controller('auth')
 export class AuthController {
