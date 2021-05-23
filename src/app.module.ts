@@ -5,6 +5,8 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { BcryptModule } from './bcrypt/bcrypt.module';
 import { InviteModule } from './invite/invite.module';
+import { JsonWebTokenModule } from './json-web-token/json-web-token.module';
+import { SessionModule } from './session/session.module';
 
 @Module({
   imports: [
@@ -27,6 +29,8 @@ import { InviteModule } from './invite/invite.module';
     InviteModule,
     UserModule,
     BcryptModule,
+    JsonWebTokenModule,
+    SessionModule,
   ],
 })
 export class AppModule {}

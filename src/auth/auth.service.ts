@@ -9,6 +9,15 @@ import {
 import { USER_ALREADY_EXIST_ERROR } from '../user/errors/user-already-exist.error';
 import { BcryptService } from '../bcrypt/bcrypt.service';
 import { InviteService } from '../invite/invite.service';
+import {
+  LoginDto,
+  LoginFailureResultDto,
+  LoginResultDto,
+  LoginSuccessResultDto,
+} from './dto/login.dto';
+import { UserEntity } from '../user/user.entity';
+import { JsonWebTokenService } from '../json-web-token/json-web-token.service';
+import { SessionService } from '../session/session.service';
 
 @Injectable()
 export class AuthService {
@@ -16,6 +25,8 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly bcryptService: BcryptService,
     private readonly inviteService: InviteService,
+    private readonly jwtService: JsonWebTokenService,
+    private readonly sessionService: SessionService,
   ) {}
 
   async register(data: RegisterDto): Promise<RegisterResultDto> {
@@ -50,5 +61,39 @@ export class AuthService {
           throw e;
       }
     }
+  }
+
+  async login(data: LoginDto): Promise<LoginResultDto> {
+    const foundUser = await this.userService.getUserByEmail(data.email);
+    const verifyResult =
+      foundUser != null &&
+      (await this.bcryptService.compare(data.password, foundUser.passwordHash));
+
+    if (verifyResult === false) {
+      const incorrectDataResult = new LoginFailureResultDto();
+      incorrectDataResult.code = 1;
+      incorrectDataResult.message = 'Incorrect login data';
+      return incorrectDataResult;
+    }
+
+    const token = this.signUser(foundUser);
+    const session = await this.sessionService.create({
+      fingerprint: data.fingerprint,
+      user: foundUser,
+    });
+
+    const result = new LoginSuccessResultDto();
+    result.id = foundUser.id;
+    result.role = foundUser.role;
+    result.token = token;
+    result.refresh = session;
+    return result;
+  }
+
+  signUser(user: UserEntity): string {
+    return this.jwtService.sign({
+      id: user.id,
+      role: user.role,
+    });
   }
 }
