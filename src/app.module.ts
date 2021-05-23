@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { BcryptModule } from './bcrypt/bcrypt.module';
+import { InviteModule } from './invite/invite.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { BcryptModule } from './bcrypt/bcrypt.module';
       }),
     }),
     AuthModule,
+    InviteModule,
     UserModule,
     BcryptModule,
   ],
