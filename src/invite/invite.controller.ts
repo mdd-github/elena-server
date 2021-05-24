@@ -1,9 +1,11 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { IApplicationResponse } from '../common/application-response.interface';
 import { InviteService } from './invite.service';
 import { RemoveDto } from './dto/remove.dto';
+import { AdminRoleGuard } from '../auth/guards/role.guard';
 
 @Controller('invite')
+@UseGuards(AdminRoleGuard)
 export class InviteController {
   constructor(private inviteService: InviteService) {}
 

@@ -4,6 +4,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserAlreadyExistError } from './errors/user-already-exist.error';
 import { CreateDto } from './dto/create.dto';
+import {
+  GetInfoFailureResultDto,
+  GetInfoResultDto, GetInfoSuccessResultDto
+} from "./dto/get-info-result.dto";
 
 @Injectable()
 export class UserService {
@@ -16,6 +20,33 @@ export class UserService {
     return this.usersRepository.findOne({
       where: { email: email.toLowerCase() },
     });
+  }
+
+  async getUserById(id: number): Promise<UserEntity> {
+    return this.usersRepository.findOne(id);
+  }
+
+  async getUserInfo(id: number): Promise<GetInfoResultDto> {
+    const notFoundResult = new GetInfoFailureResultDto();
+    notFoundResult.code = 1;
+    notFoundResult.message = 'User not found';
+    if (id == null) {
+      return notFoundResult;
+    }
+
+    const foundUser = await this.getUserById(id);
+    if (foundUser == null) {
+      return notFoundResult;
+    }
+
+    const result = new GetInfoSuccessResultDto();
+    result.id = foundUser.id;
+    result.banned = foundUser.banned;
+    result.email = foundUser.email;
+    result.firstName = foundUser.firstName;
+    result.lastName = foundUser.lastName;
+    result.role = foundUser.role;
+    return result;
   }
 
   async create(data: CreateDto): Promise<UserEntity> {

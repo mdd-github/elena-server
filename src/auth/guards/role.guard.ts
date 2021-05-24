@@ -6,9 +6,10 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 import { JsonWebTokenService } from '../../json-web-token/json-web-token.service';
+import { UserRoles } from '../../user/user.entity';
 
 @Injectable()
-export class AuthGuard implements CanActivate {
+export class AdminRoleGuard implements CanActivate {
   constructor(private readonly jwtService: JsonWebTokenService) {}
 
   canActivate(context: ExecutionContext): boolean {
@@ -16,13 +17,10 @@ export class AuthGuard implements CanActivate {
     const token = req.headers['authorization']?.split(' ')[1];
     if (token != null) {
       const decodedToken: any = this.jwtService.verify(token);
-      if (decodedToken != null) {
-        req.body.userId = decodedToken.id;
-        req.body.userRole = decodedToken.role;
+      if (decodedToken != null && decodedToken.role === UserRoles.Admin) {
         return true;
       }
     }
-
-    throw new UnauthorizedException();
+    return false;
   }
 }
