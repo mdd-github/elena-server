@@ -12,7 +12,7 @@ export class ValidationInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(
       catchError((err) => {
-        if (err.response.message != null) {
+        if (err.response?.message != null) {
           const code = +err.response.message[0].split('|')[0];
           const message = err.response.message[0].split('|')[1];
 
