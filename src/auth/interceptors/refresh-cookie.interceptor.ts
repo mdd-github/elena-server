@@ -18,7 +18,7 @@ export class RefreshCookieInterceptor implements NestInterceptor {
 
     return next.handle().pipe(
       map((result: IApplicationResponse) => {
-        if (result.payload.refresh != null) {
+        if (result.payload?.refresh != null) {
           const refresh = result.payload.refresh;
           delete result.payload.refresh;
 

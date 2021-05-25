@@ -1,20 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import {
-  RegisterDto, RegisterErrors,
+  RegisterDto,
+  RegisterErrors,
   RegisterFailureResultDto,
   RegisterResultDto,
-  RegisterSuccessResultDto
-} from "./dto/register.dto";
+  RegisterSuccessResultDto,
+} from './dto/register.dto';
 import { USER_ALREADY_EXIST_ERROR } from '../user/errors/user-already-exist.error';
 import { BcryptService } from '../bcrypt/bcrypt.service';
 import { InviteService } from '../invite/invite.service';
 import {
-  LoginDto, LoginErrors,
+  LoginDto,
+  LoginErrors,
   LoginFailureResultDto,
   LoginResultDto,
-  LoginSuccessResultDto
-} from "./dto/login.dto";
+  LoginSuccessResultDto,
+} from './dto/login.dto';
 import { UserEntity } from '../user/user.entity';
 import { JsonWebTokenService } from '../json-web-token/json-web-token.service';
 import { SessionService } from '../session/session.service';
@@ -122,6 +124,10 @@ export class AuthService {
           throw e;
       }
     }
+  }
+
+  async logout(data: any): Promise<void> {
+    await this.sessionService.remove(data.refresh);
   }
 
   signUser(user: UserEntity): string {

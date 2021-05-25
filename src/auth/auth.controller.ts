@@ -56,4 +56,15 @@ export class AuthController {
           payload: result,
         };
   }
+
+  @Post('logout')
+  @UseInterceptors(RefreshCookieInterceptor)
+  async logout(@Body() data: any): Promise<IApplicationResponse> {
+    await this.authService.logout(data);
+
+    return {
+      success: true,
+      payload: null,
+    };
+  }
 }
