@@ -1,7 +1,26 @@
+import { IsNotEmpty } from 'class-validator';
+
+export enum LoginErrors {
+  EmailRequired,
+  PasswordRequired,
+  FingerprintRequired,
+  IncorrectLoginData,
+}
+
 export class LoginDto {
+  @IsNotEmpty({
+    message: LoginErrors.EmailRequired + '|Email is required',
+  })
   email: string;
+
+  @IsNotEmpty({
+    message: LoginErrors.PasswordRequired + '|Password is required',
+  })
   password: string;
 
+  @IsNotEmpty({
+    message: LoginErrors.FingerprintRequired + '|Fingerprint is required',
+  })
   fingerprint: string;
 }
 

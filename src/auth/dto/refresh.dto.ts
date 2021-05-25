@@ -11,8 +11,6 @@ export class RefreshSuccessResultDto {
 }
 
 export class RefreshFailureResultDto {
-  code: number;
-  message: string;
 }
 
 export type RefreshResultDto =

@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { INestApplication, Logger } from '@nestjs/common';
+import { INestApplication, Logger, ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 
 const parseCorsWhitelist = (list: string): string[] => {
@@ -12,12 +12,16 @@ const corsWhiteList = parseCorsWhitelist(process.env.APP_CORS_WHITELIST);
 
 const applyMiddlewares = (app: INestApplication) => {
   app.use(cookieParser());
+  app.useGlobalPipes(new ValidationPipe());
 };
 
 const enableCors = (app: INestApplication) => {
   app.enableCors({
     origin: function (origin, callback) {
-      if (corsWhiteList.indexOf(origin) !== -1 || typeof origin === 'undefined') {
+      if (
+        corsWhiteList.indexOf(origin) !== -1 ||
+        typeof origin === 'undefined'
+      ) {
         callback(null, true);
       } else {
         Logger.log('blocked cors for: ' + origin, '[CORS]');

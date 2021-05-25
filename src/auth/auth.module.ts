@@ -10,6 +10,7 @@ import { SessionModule } from '../session/session.module';
 import { RefreshCookieInterceptor } from './interceptors/refresh-cookie.interceptor';
 import { AuthGuard } from './guards/auth.guard';
 import { AdminRoleGuard } from './guards/role.guard';
+import { ValidationInterceptor } from './interceptors/validation.interceptor';
 
 @Module({
   imports: [
@@ -20,7 +21,13 @@ import { AdminRoleGuard } from './guards/role.guard';
     JsonWebTokenModule,
     SessionModule,
   ],
-  providers: [AuthService, RefreshCookieInterceptor, AuthGuard, AdminRoleGuard],
+  providers: [
+    AuthService,
+    RefreshCookieInterceptor,
+    AuthGuard,
+    AdminRoleGuard,
+    ValidationInterceptor,
+  ],
   controllers: [AuthController],
   exports: [AuthGuard, AdminRoleGuard],
 })

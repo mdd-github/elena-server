@@ -1,20 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import {
-  RegisterDto,
+  RegisterDto, RegisterErrors,
   RegisterFailureResultDto,
   RegisterResultDto,
-  RegisterSuccessResultDto,
-} from './dto/register.dto';
+  RegisterSuccessResultDto
+} from "./dto/register.dto";
 import { USER_ALREADY_EXIST_ERROR } from '../user/errors/user-already-exist.error';
 import { BcryptService } from '../bcrypt/bcrypt.service';
 import { InviteService } from '../invite/invite.service';
 import {
-  LoginDto,
+  LoginDto, LoginErrors,
   LoginFailureResultDto,
   LoginResultDto,
-  LoginSuccessResultDto,
-} from './dto/login.dto';
+  LoginSuccessResultDto
+} from "./dto/login.dto";
 import { UserEntity } from '../user/user.entity';
 import { JsonWebTokenService } from '../json-web-token/json-web-token.service';
 import { SessionService } from '../session/session.service';
@@ -40,7 +40,7 @@ export class AuthService {
   async register(data: RegisterDto): Promise<RegisterResultDto> {
     if ((await this.inviteService.check(data.invite)) === false) {
       const result = new RegisterFailureResultDto();
-      result.code = 1;
+      result.code = RegisterErrors.IncorrectInvite;
       result.message = 'Incorrect invite code';
       return result;
     }
@@ -62,7 +62,7 @@ export class AuthService {
       const result = new RegisterFailureResultDto();
       switch (e.name) {
         case USER_ALREADY_EXIST_ERROR:
-          result.code = 2;
+          result.code = RegisterErrors.UserAlreadyExist;
           result.message = e.message;
           return result;
         default:
@@ -79,7 +79,7 @@ export class AuthService {
 
     if (verifyResult === false) {
       const incorrectDataResult = new LoginFailureResultDto();
-      incorrectDataResult.code = 1;
+      incorrectDataResult.code = LoginErrors.IncorrectLoginData;
       incorrectDataResult.message = 'Incorrect login data';
       return incorrectDataResult;
     }
@@ -114,16 +114,10 @@ export class AuthService {
       result.token = token;
       return result;
     } catch (e) {
-      const result = new RefreshFailureResultDto();
       switch (e.name) {
         case INCORRECT_SESSION_ERROR:
-          result.code = 1;
-          result.message = e.message;
-          return result;
         case SESSION_EXPIRED_ERROR:
-          result.code = 2;
-          result.message = e.message;
-          return result;
+          return new RefreshFailureResultDto();
         default:
           throw e;
       }

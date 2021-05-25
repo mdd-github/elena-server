@@ -27,6 +27,7 @@ export class RefreshCookieInterceptor implements NestInterceptor {
             path: '/auth',
             domain: 'localhost',
             sameSite: 'none',
+            secure: true,
           });
           res.send(result);
         } else {

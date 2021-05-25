@@ -5,12 +5,14 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
 import { RefreshCookieInterceptor } from './interceptors/refresh-cookie.interceptor';
+import { ValidationInterceptor } from './interceptors/validation.interceptor';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
+  @UseInterceptors(ValidationInterceptor)
   async register(@Body() data: RegisterDto): Promise<IApplicationResponse> {
     const result = await this.authService.register(data);
 
@@ -26,7 +28,7 @@ export class AuthController {
   }
 
   @Post('login')
-  @UseInterceptors(RefreshCookieInterceptor)
+  @UseInterceptors(ValidationInterceptor, RefreshCookieInterceptor)
   async login(@Body() data: LoginDto): Promise<IApplicationResponse> {
     const result = await this.authService.login(data);
     return result.constructor.name == 'LoginSuccessResultDto'
@@ -41,7 +43,7 @@ export class AuthController {
   }
 
   @Post('refresh')
-  @UseInterceptors(RefreshCookieInterceptor)
+  @UseInterceptors(ValidationInterceptor, RefreshCookieInterceptor)
   async refresh(@Body() data: RefreshDto): Promise<IApplicationResponse> {
     const result = await this.authService.refresh(data);
     return result.constructor.name == 'RefreshSuccessResultDto'
