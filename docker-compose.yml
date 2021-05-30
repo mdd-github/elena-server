@@ -1,0 +1,46 @@
+version: '3'
+
+services:
+  server:
+    build: .
+    restart: always
+    container_name: server_container
+    entrypoint: bash -c "npm run typeorm:r && npm run start:prod"
+    env_file:
+      - .env
+    ports:
+      - 8080:3000
+    depends_on:
+      - mysql_db
+    networks:
+      - server_network
+
+  mysql_db:
+    image: mysql:latest
+    container_name: mysql_container
+    restart: always
+    volumes:
+    - dbvolume:/var/lib/mysql
+    env_file:
+      - .env
+    ports:
+      - 3306:3306
+    networks:
+      server_network:
+        ipv4_address: 172.80.0.5
+
+volumes:
+  dbvolume:
+    name: dbvolume
+    driver: local
+
+networks:
+  server_network:
+    name: server_network
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: 'false'
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.80.0.0/16
