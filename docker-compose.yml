@@ -26,11 +26,11 @@ services:
 
 networks:
   server_network:
-  name: server_network
-  driver: bridge
-  driver_opts:
-    com.docker.network.enable_ipv6: 'false'
-  ipam:
-    driver: default
-    config:
-     - subnet: 172.80.0.0/16
+    name: server_network
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: 'false'
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.80.0.0/16
