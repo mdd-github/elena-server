@@ -5,10 +5,11 @@ services:
     build: .
     restart: always
     container_name: server_container
+    entrypoint: bash -c "npm run typeorm:r && npm run start:prod"
     env_file:
       - .env
     ports:
-      - 3000:8080
+      - 8080:3000
     depends_on:
       - mysql_db
     networks:
@@ -17,6 +18,9 @@ services:
   mysql_db:
     image: mysql:latest
     container_name: mysql_container
+    restart: always
+    volumes:
+    - dbvolume:/var/lib/mysql
     env_file:
       - .env
     ports:
@@ -24,6 +28,11 @@ services:
     networks:
       server_network:
         ipv4_address: 172.80.0.5
+
+volumes:
+  dbvolume:
+    name: dbvolume
+    driver: local
 
 networks:
   server_network:
