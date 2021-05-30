@@ -22,7 +22,8 @@ services:
     ports:
       - 3306:3306
     networks:
-      - server_network
+      server_network:
+        ipv4_address: 172.80.0.5
 
 networks:
   server_network:
