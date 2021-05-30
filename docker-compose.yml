@@ -1,0 +1,30 @@
+services:
+  server:
+    build: .
+    restart: always
+    container_name: server_container
+    env_file:
+      - .env
+    ports:
+    - 3000:8080
+    depends_on:
+      - mysql_db
+    networks:
+      server_network:
+        ipv4_address: 10.1.1.10
+
+  mysql_db:
+    image: mysql:latest
+    container_name: mysql_container
+    env_file:
+      - .env
+    networks:
+      server_network:
+        ipv4_address: 10.1.1.20
+
+networks:
+  server_network:
+    ipam:
+      driver: bridge
+      config:
+        - subnet: "10.1.1.0/24"

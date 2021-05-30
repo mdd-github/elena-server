@@ -36,6 +36,7 @@ const enableCors = (app: INestApplication) => {
 };
 
 (async () => {
+  console.log(process.env);
   const app = await NestFactory.create(AppModule);
   enableCors(app);
   applyMiddlewares(app);
