@@ -6,27 +6,42 @@ import { AuthGuard } from '../auth/guards/auth.guard';
 import { GetInfoSuccessResultDto } from './dto/get-info-result.dto';
 import { GetAllSuccessResultDto } from './dto/get-all-result.dto';
 import { AdminRoleGuard } from '../auth/guards/role.guard';
+import { RemoveSuccessResultDto } from './dto/remove-result.dto';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @Post('remove/:id')
+  @UseGuards(AdminRoleGuard)
+  async remove(
+    @Param('id') id: number,
+    @Body() body: any,
+  ): Promise<IApplicationResponse> {
+    if (body.userId !== id) {
+      await this.userService.removeById(id);
+
+      return {
+        success: true,
+        payload: {},
+      };
+    } else {
+      return {
+        success: false,
+        payload: {
+          code: 0,
+          message: "You can't remove yourself",
+        },
+      };
+    }
+  }
+
   @Get('all')
   @UseGuards(AdminRoleGuard)
-  async getAll(@Body() body: any): Promise<IApplicationResponse> {
+  async getAll(): Promise<IApplicationResponse> {
     const result = await this.userService.getAll();
 
     if (result instanceof GetAllSuccessResultDto) {
-      if (body.userRole !== UserRoles.Admin) {
-        return {
-          success: false,
-          payload: {
-            errorCode: 1,
-            errorMessage: 'Access denied',
-          },
-        };
-      }
-
       return {
         success: true,
         payload: result,

@@ -14,6 +14,7 @@ import {
   GetAllResultDto,
   GetAllSuccessResultDto,
 } from './dto/get-all-result.dto';
+import { RemoveFailureResultDto, RemoveResultDto } from "./dto/remove-result.dto";
 
 @Injectable()
 export class UserService {
@@ -21,6 +22,10 @@ export class UserService {
     @InjectRepository(UserEntity)
     private readonly usersRepository: Repository<UserEntity>,
   ) {}
+
+  async removeById(id: number): Promise<void> {
+    await this.usersRepository.delete(id);
+  }
 
   async getAll(): Promise<GetAllResultDto> {
     const users = await this.usersRepository.find();
