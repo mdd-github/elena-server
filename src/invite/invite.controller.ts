@@ -1,13 +1,32 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { IApplicationResponse } from '../common/application-response.interface';
 import { InviteService } from './invite.service';
 import { RemoveDto } from './dto/remove.dto';
 import { AdminRoleGuard } from '../auth/guards/role.guard';
+import { GetAllSuccessResultDto } from './dto/get-all-result.dto';
 
 @Controller('invite')
 @UseGuards(AdminRoleGuard)
 export class InviteController {
   constructor(private inviteService: InviteService) {}
+
+  @Get('all')
+  @UseGuards(AdminRoleGuard)
+  async getAll(): Promise<IApplicationResponse> {
+    const result = await this.inviteService.getAll();
+
+    if (result instanceof GetAllSuccessResultDto) {
+      return {
+        success: true,
+        payload: result,
+      };
+    } else {
+      return {
+        success: false,
+        payload: result,
+      };
+    }
+  }
 
   @Post('create')
   async create(): Promise<IApplicationResponse> {

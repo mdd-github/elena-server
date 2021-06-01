@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as uuid from 'uuid';
 import { Repository } from 'typeorm';
 import { InviteEntity } from './invite.entity';
+import { GetAllFailureResultDto, GetAllResultDto, GetAllSuccessResultDto } from "./dto/get-all-result.dto";
 
 @Injectable()
 export class InviteService {
@@ -10,6 +11,22 @@ export class InviteService {
     @InjectRepository(InviteEntity)
     private invitesRepository: Repository<InviteEntity>,
   ) {}
+
+  async getAll(): Promise<GetAllResultDto> {
+    const invites = await this.invitesRepository.find();
+
+    if (invites == null) {
+      const result = new GetAllFailureResultDto();
+      result.code = 0;
+      result.message = 'Unknown error';
+      return result;
+    }
+
+    const result = new GetAllSuccessResultDto();
+    result.count = invites.length;
+    result.invites = invites;
+    return result;
+  }
 
   async generate(): Promise<string> {
     const expiresAt = new Date();
