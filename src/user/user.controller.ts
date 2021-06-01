@@ -36,6 +36,54 @@ export class UserController {
     }
   }
 
+  @Post('ban/:id')
+  @UseGuards(AdminRoleGuard)
+  async ban(
+    @Param('id') id: number,
+    @Body() body: any,
+  ): Promise<IApplicationResponse> {
+    if (body.userId !== id) {
+      await this.userService.banById(id);
+
+      return {
+        success: true,
+        payload: {},
+      };
+    } else {
+      return {
+        success: false,
+        payload: {
+          code: 0,
+          message: "You can't ban yourself",
+        },
+      };
+    }
+  }
+
+  @Post('unban/:id')
+  @UseGuards(AdminRoleGuard)
+  async unban(
+    @Param('id') id: number,
+    @Body() body: any,
+  ): Promise<IApplicationResponse> {
+    if (body.userId !== id) {
+      await this.userService.unbanById(id);
+
+      return {
+        success: true,
+        payload: {},
+      };
+    } else {
+      return {
+        success: false,
+        payload: {
+          code: 0,
+          message: "You can't unban yourself",
+        },
+      };
+    }
+  }
+
   @Get('all')
   @UseGuards(AdminRoleGuard)
   async getAll(): Promise<IApplicationResponse> {

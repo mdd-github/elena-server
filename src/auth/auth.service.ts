@@ -74,6 +74,13 @@ export class AuthService {
 
   async login(data: LoginDto): Promise<LoginResultDto> {
     const foundUser = await this.userService.getUserByEmail(data.email);
+    if (foundUser?.banned) {
+      const bannedResult = new LoginFailureResultDto();
+      bannedResult.code = LoginErrors.UserBanned;
+      bannedResult.message = 'This user is banned';
+      return bannedResult;
+    }
+
     const verifyResult =
       foundUser != null &&
       (await this.bcryptService.compare(data.password, foundUser.passwordHash));

@@ -5,6 +5,7 @@ export enum LoginErrors {
   PasswordRequired,
   FingerprintRequired,
   IncorrectLoginData,
+  UserBanned,
 }
 
 export class LoginDto {

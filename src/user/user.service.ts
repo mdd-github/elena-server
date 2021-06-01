@@ -14,7 +14,10 @@ import {
   GetAllResultDto,
   GetAllSuccessResultDto,
 } from './dto/get-all-result.dto';
-import { RemoveFailureResultDto, RemoveResultDto } from "./dto/remove-result.dto";
+import {
+  RemoveFailureResultDto,
+  RemoveResultDto,
+} from './dto/remove-result.dto';
 
 @Injectable()
 export class UserService {
@@ -25,6 +28,26 @@ export class UserService {
 
   async removeById(id: number): Promise<void> {
     await this.usersRepository.delete(id);
+  }
+
+  async banById(id: number): Promise<void> {
+    const user = await this.getUserById(id);
+
+    // TODO return error if not found
+    if (user != null) {
+      user.banned = true;
+      await this.usersRepository.save(user);
+    }
+  }
+
+  async unbanById(id: number): Promise<void> {
+    const user = await this.getUserById(id);
+
+    // TODO return error if not found
+    if (user != null) {
+      user.banned = false;
+      await this.usersRepository.save(user);
+    }
   }
 
   async getAll(): Promise<GetAllResultDto> {
@@ -45,6 +68,7 @@ export class UserService {
       lastName: user.lastName,
       role: user.role,
       email: user.email,
+      banned: user.banned,
     }));
     return result;
   }
