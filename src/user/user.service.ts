@@ -6,8 +6,14 @@ import { UserAlreadyExistError } from './errors/user-already-exist.error';
 import { CreateDto } from './dto/create.dto';
 import {
   GetInfoFailureResultDto,
-  GetInfoResultDto, GetInfoSuccessResultDto
-} from "./dto/get-info-result.dto";
+  GetInfoResultDto,
+  GetInfoSuccessResultDto,
+} from './dto/get-info-result.dto';
+import {
+  GetAllFailureResultDto,
+  GetAllResultDto,
+  GetAllSuccessResultDto,
+} from './dto/get-all-result.dto';
 
 @Injectable()
 export class UserService {
@@ -15,6 +21,28 @@ export class UserService {
     @InjectRepository(UserEntity)
     private readonly usersRepository: Repository<UserEntity>,
   ) {}
+
+  async getAll(): Promise<GetAllResultDto> {
+    const users = await this.usersRepository.find();
+
+    if (users == null) {
+      const result = new GetAllFailureResultDto();
+      result.code = 0;
+      result.message = 'Unknown error';
+      return result;
+    }
+
+    const result = new GetAllSuccessResultDto();
+    result.count = users.length;
+    result.users = users.map((user) => ({
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      role: user.role,
+      email: user.email,
+    }));
+    return result;
+  }
 
   async getUserByEmail(email: string): Promise<UserEntity> {
     return this.usersRepository.findOne({

@@ -29,7 +29,7 @@ const enableCors = (app: INestApplication) => {
       }
     },
     allowedHeaders:
-      'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept, Observe',
+      'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept, Observe, Authorization',
     methods: 'GET,PUT,POST,DELETE,UPDATE,OPTIONS',
     credentials: true,
   });

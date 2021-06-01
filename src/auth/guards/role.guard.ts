@@ -19,9 +19,11 @@ export class AdminRoleGuard implements CanActivate {
       try {
         const decodedToken: any = this.jwtService.verify(token);
         if (decodedToken != null && decodedToken.role === UserRoles.Admin) {
+          req.body.userId = decodedToken.id;
+          req.body.userRole = decodedToken.role;
           return true;
         }
-      } catch (e){
+      } catch (e) {
         return false;
       }
     }
