@@ -47,8 +47,6 @@ export class AuthService {
       return result;
     }
 
-    await this.inviteService.remove(data.invite);
-
     try {
       const passwordHash = await this.bcryptService.hash(data.password);
       const createdUser = await this.userService.create({
@@ -56,6 +54,7 @@ export class AuthService {
         password: passwordHash,
       });
 
+      await this.inviteService.remove(data.invite);
       const result = new RegisterSuccessResultDto();
       result.id = createdUser.id;
       result.role = createdUser.role;
