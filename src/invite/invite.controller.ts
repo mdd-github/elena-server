@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
 import { IApplicationResponse } from '../common/application-response.interface';
 import { InviteService } from './invite.service';
 import { RemoveDto } from './dto/remove.dto';
@@ -39,9 +39,9 @@ export class InviteController {
     };
   }
 
-  @Post('remove')
-  async remove(@Body() data: RemoveDto): Promise<IApplicationResponse> {
-    await this.inviteService.remove(data.invite);
+  @Post('remove/:invite')
+  async remove(@Param('invite') invite: string): Promise<IApplicationResponse> {
+    await this.inviteService.remove(invite);
     return {
       success: true,
       payload: {},
