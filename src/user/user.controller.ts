@@ -18,7 +18,7 @@ import { RemoveSuccessResultDto } from './dto/remove-result.dto';
 import { ChangePasswordDto, ChangePasswordSucceedResultDto } from './dto/change-password.dto';
 import { ValidationInterceptor } from '../auth/interceptors/validation.interceptor';
 
-@Controller('user')
+@Controller('api/user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 

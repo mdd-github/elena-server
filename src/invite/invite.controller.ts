@@ -5,7 +5,7 @@ import { RemoveDto } from './dto/remove.dto';
 import { AdminRoleGuard } from '../auth/guards/role.guard';
 import { GetAllSuccessResultDto } from './dto/get-all-result.dto';
 
-@Controller('invite')
+@Controller('api/invite')
 @UseGuards(AdminRoleGuard)
 export class InviteController {
   constructor(private inviteService: InviteService) {}

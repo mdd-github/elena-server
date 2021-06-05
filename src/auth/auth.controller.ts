@@ -7,7 +7,7 @@ import { RefreshDto } from './dto/refresh.dto';
 import { RefreshCookieInterceptor } from './interceptors/refresh-cookie.interceptor';
 import { ValidationInterceptor } from './interceptors/validation.interceptor';
 
-@Controller('auth')
+@Controller('api/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
