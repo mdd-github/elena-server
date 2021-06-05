@@ -12,6 +12,31 @@ import { RemoveSuccessResultDto } from './dto/remove-result.dto';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @Post('set-role/:id/:role')
+  @UseGuards(AdminRoleGuard)
+  async setRole(
+    @Param('id') id: number,
+    @Param('role') role: string,
+    @Body() body: any,
+  ): Promise<IApplicationResponse> {
+    if (body.userId !== id) {
+      await this.userService.setRole(id, role);
+
+      return {
+        success: true,
+        payload: {},
+      };
+    } else {
+      return {
+        success: false,
+        payload: {
+          code: 0,
+          message: "You can't change role",
+        },
+      };
+    }
+  }
+
   @Post('remove/:id')
   @UseGuards(AdminRoleGuard)
   async remove(

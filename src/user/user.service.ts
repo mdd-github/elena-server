@@ -50,6 +50,16 @@ export class UserService {
     }
   }
 
+  async setRole(id: number, role: string): Promise<void> {
+    const user = await this.getUserById(id);
+
+    // TODO return error if not found
+    if (user != null) {
+      user.role = role;
+      await this.usersRepository.save(user);
+    }
+  }
+
   async getAll(): Promise<GetAllResultDto> {
     const users = await this.usersRepository.find();
 
