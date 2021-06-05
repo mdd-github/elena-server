@@ -15,15 +15,22 @@ import {
   GetAllSuccessResultDto,
 } from './dto/get-all-result.dto';
 import {
-  RemoveFailureResultDto,
-  RemoveResultDto,
-} from './dto/remove-result.dto';
+  ChangePasswordDto,
+  ChangePasswordErrors,
+  ChangePasswordFailedResultDto,
+  ChangePasswordResultDto,
+  ChangePasswordSucceedResultDto,
+} from './dto/change-password.dto';
+import { SessionService } from '../session/session.service';
+import { BcryptService } from '../bcrypt/bcrypt.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly usersRepository: Repository<UserEntity>,
+    private readonly sessionService: SessionService,
+    private readonly bcryptService: BcryptService,
   ) {}
 
   async removeById(id: number): Promise<void> {
@@ -48,6 +55,35 @@ export class UserService {
       user.banned = false;
       await this.usersRepository.save(user);
     }
+  }
+
+  async changePassword(
+    body: ChangePasswordDto,
+  ): Promise<ChangePasswordResultDto> {
+    const user = await this.getUserById(body.userId);
+
+    if (user == null) {
+      const failed = new ChangePasswordFailedResultDto();
+      failed.code = 100;
+      failed.message = 'User not found';
+      return failed;
+    }
+
+    if (
+      !(await this.bcryptService.compare(body.oldPassword, user.passwordHash))
+    ) {
+      const failed = new ChangePasswordFailedResultDto();
+      failed.code = ChangePasswordErrors.IncorrectPassword;
+      failed.message = 'Incorrect password';
+      return failed;
+    }
+
+    await this.sessionService.removeSessionOfUser(user);
+
+    user.passwordHash = await this.bcryptService.hash(body.newPassword);
+    await this.usersRepository.save(user);
+
+    return new ChangePasswordSucceedResultDto();
   }
 
   async setRole(id: number, role: string): Promise<void> {

@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  UnauthorizedException,
+  UseGuards, UseInterceptors,
+} from '@nestjs/common';
 import { IApplicationResponse } from '../common/application-response.interface';
 import { UserService } from './user.service';
 import { UserRoles } from './user.entity';
@@ -7,6 +15,8 @@ import { GetInfoSuccessResultDto } from './dto/get-info-result.dto';
 import { GetAllSuccessResultDto } from './dto/get-all-result.dto';
 import { AdminRoleGuard } from '../auth/guards/role.guard';
 import { RemoveSuccessResultDto } from './dto/remove-result.dto';
+import { ChangePasswordDto, ChangePasswordSucceedResultDto } from './dto/change-password.dto';
+import { ValidationInterceptor } from '../auth/interceptors/validation.interceptor';
 
 @Controller('user')
 export class UserController {
@@ -19,7 +29,7 @@ export class UserController {
     @Param('role') role: string,
     @Body() body: any,
   ): Promise<IApplicationResponse> {
-    if (body.userId !== id) {
+    if (body.userId != id) {
       await this.userService.setRole(id, role);
 
       return {
@@ -43,7 +53,7 @@ export class UserController {
     @Param('id') id: number,
     @Body() body: any,
   ): Promise<IApplicationResponse> {
-    if (body.userId !== id) {
+    if (body.userId != id) {
       await this.userService.removeById(id);
 
       return {
@@ -67,7 +77,7 @@ export class UserController {
     @Param('id') id: number,
     @Body() body: any,
   ): Promise<IApplicationResponse> {
-    if (body.userId !== id) {
+    if (body.userId != id) {
       await this.userService.banById(id);
 
       return {
@@ -91,7 +101,7 @@ export class UserController {
     @Param('id') id: number,
     @Body() body: any,
   ): Promise<IApplicationResponse> {
-    if (body.userId !== id) {
+    if (body.userId != id) {
       await this.userService.unbanById(id);
 
       return {
@@ -107,6 +117,25 @@ export class UserController {
         },
       };
     }
+  }
+
+  @Post('change-password')
+  @UseGuards(AuthGuard)
+  @UseInterceptors(ValidationInterceptor)
+  async changePassword(
+    @Body() body: ChangePasswordDto,
+  ): Promise<IApplicationResponse> {
+    const result = await this.userService.changePassword(body);
+
+    return result instanceof ChangePasswordSucceedResultDto
+      ? {
+          success: true,
+          payload: result,
+        }
+      : {
+          success: false,
+          payload: result,
+        };
   }
 
   @Get('all')

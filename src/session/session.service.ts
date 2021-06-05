@@ -15,6 +15,14 @@ export class SessionService {
     private readonly sessionsRepository: Repository<SessionEntity>,
   ) {}
 
+  async removeSessionOfUser(user: UserEntity): Promise<void> {
+    const sessionsOfUser = await this.sessionsRepository.find({
+      where: { user: user },
+    });
+
+    await this.sessionsRepository.remove(sessionsOfUser);
+  }
+
   async cleanSessionOfUser(user: UserEntity, fingerprint = ''): Promise<void> {
     const sessionsOfUser = await this.sessionsRepository.find({
       where: { user: user },

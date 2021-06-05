@@ -6,12 +6,16 @@ import { UserController } from './user.controller';
 import { UserEntity } from './user.entity';
 import { AuthModule } from '../auth/auth.module';
 import { JsonWebTokenModule } from '../json-web-token/json-web-token.module';
+import { SessionModule } from '../session/session.module';
+import { BcryptModule } from '../bcrypt/bcrypt.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([UserEntity]),
     forwardRef(() => AuthModule),
     JsonWebTokenModule,
+    SessionModule,
+    BcryptModule,
   ],
   providers: [UserService],
   controllers: [UserController],
