@@ -25,7 +25,7 @@ export class RefreshCookieInterceptor implements NestInterceptor {
           res.cookie('refresh', refresh, {
             httpOnly: true,
             path: '/auth',
-            domain: 'localhost',
+            domain: 'matrix.titovasvetlana.ru',
             sameSite: 'none',
             secure: true,
           });
