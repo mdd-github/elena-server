@@ -4,8 +4,11 @@ import {
   Get,
   Param,
   Post,
+  Put,
   UnauthorizedException,
-  UseGuards, UseInterceptors,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { IApplicationResponse } from '../common/application-response.interface';
 import { UserService } from './user.service';
@@ -15,8 +18,16 @@ import { GetInfoSuccessResultDto } from './dto/get-info-result.dto';
 import { GetAllSuccessResultDto } from './dto/get-all-result.dto';
 import { AdminRoleGuard } from '../auth/guards/role.guard';
 import { RemoveSuccessResultDto } from './dto/remove-result.dto';
-import { ChangePasswordDto, ChangePasswordSucceedResultDto } from './dto/change-password.dto';
+import {
+  ChangePasswordDto,
+  ChangePasswordSucceedResultDto,
+} from './dto/change-password.dto';
 import { ValidationInterceptor } from '../auth/interceptors/validation.interceptor';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { log } from 'util';
+import * as fs from 'fs';
+import * as csv from 'csv-parser';
+import { Readable } from 'stream';
 
 @Controller('api/user')
 export class UserController {
@@ -180,5 +191,37 @@ export class UserController {
           success: false,
           payload: result,
         };
+  }
+
+  @Put('import')
+  @UseGuards(AdminRoleGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  async import(@UploadedFile() file: Express.Multer.File): Promise<void> {
+    const data = file.buffer.toString('utf-8', 0, file.buffer.length);
+    const s = new Readable();
+
+    s.pipe(csv()).on('data', async (user) => {
+      try {
+        const date = new Date();
+        const partsOfDate = user.trial_before.split('/');
+        if (partsOfDate.length == 3) {
+          date.setDate(partsOfDate[0]);
+          date.setMonth(partsOfDate[1] - 1);
+          date.setFullYear(partsOfDate[2]);
+        }
+
+        await this.userService.create2({
+          email: user.email,
+          password: user.password,
+          firstName: user.first_name,
+          lastName: user.last_name,
+          isTrial: user.is_trial,
+          trialExpiresAt: date,
+          role: user.role,
+        });
+      } catch (e) {}
+    });
+    s._read = () => {};
+    s.push(data);
   }
 }

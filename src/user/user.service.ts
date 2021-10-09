@@ -3,7 +3,7 @@ import { UserEntity, UserRoles } from './user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserAlreadyExistError } from './errors/user-already-exist.error';
-import { CreateDto } from './dto/create.dto';
+import { Create2Dto, CreateDto } from "./dto/create.dto";
 import {
   GetInfoFailureResultDto,
   GetInfoResultDto,
@@ -115,6 +115,8 @@ export class UserService {
       role: user.role,
       email: user.email,
       banned: user.banned,
+      isTrial: user.isTrial,
+      trialExpiredAt: user.trialExpiresAt,
     }));
     return result;
   }
@@ -165,6 +167,26 @@ export class UserService {
     newUser.lastName = data.lastName;
     newUser.passwordHash = data.password;
     newUser.role = UserRoles.Employee;
+    newUser.banned = false;
+    newUser.trialExpiresAt = data.trialExpiresAt;
+    newUser.isTrial = data.isTrial;
+
+    return await this.usersRepository.save(newUser);
+  }
+
+  async create2(data: Create2Dto): Promise<UserEntity> {
+    const foundUser = await this.getUserByEmail(data.email);
+
+    if (!!foundUser) {
+      throw new UserAlreadyExistError();
+    }
+
+    const newUser = new UserEntity();
+    newUser.email = data.email.toLowerCase();
+    newUser.firstName = data.firstName;
+    newUser.lastName = data.lastName;
+    newUser.passwordHash = await this.bcryptService.hash(data.password);
+    newUser.role = data.role;
     newUser.banned = false;
     newUser.trialExpiresAt = data.trialExpiresAt;
     newUser.isTrial = data.isTrial;
