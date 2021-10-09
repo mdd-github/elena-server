@@ -14,4 +14,14 @@ export class InviteEntity {
     name: 'expires_at',
   })
   expiresAt: Date;
+
+  @Column({
+    name: 'is_group',
+  })
+  isGroup: boolean;
+
+  @Column({
+    name: 'limit'
+  })
+  limit: number;
 }

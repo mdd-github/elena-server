@@ -38,4 +38,16 @@ export class UserEntity {
 
   @Column()
   banned: boolean;
+
+  @Column({
+    name: 'trial_expires_at',
+    default: () => 'NOW()',
+  })
+  trialExpiresAt: Date;
+
+  @Column({
+    name: 'is_trial',
+    default: false,
+  })
+  isTrial: boolean;
 }

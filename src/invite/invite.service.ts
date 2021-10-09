@@ -36,6 +36,8 @@ export class InviteService {
     const newInvite = new InviteEntity();
     newInvite.expiresAt = expiresAt;
     newInvite.value = value;
+    newInvite.isGroup = false;
+    newInvite.limit = -1;
     await this.invitesRepository.save(newInvite);
 
     return value;
