@@ -21,7 +21,7 @@ export class InviteEntity {
   isGroup: boolean;
 
   @Column({
-    name: 'limit'
+    name: 'limit',
   })
   limit: number;
 }

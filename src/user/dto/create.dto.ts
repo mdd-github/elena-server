@@ -5,4 +5,7 @@ export interface CreateDto {
 
   firstName: string;
   lastName: string;
+
+  isTrial: boolean;
+  trialExpiresAt: Date;
 }

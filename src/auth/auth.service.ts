@@ -40,6 +40,8 @@ export class AuthService {
   ) {}
 
   async register(data: RegisterDto): Promise<RegisterResultDto> {
+    const invite = await this.inviteService.getOne(data.invite);
+
     if ((await this.inviteService.check(data.invite)) === false) {
       const result = new RegisterFailureResultDto();
       result.code = RegisterErrors.IncorrectInvite;
@@ -48,13 +50,20 @@ export class AuthService {
     }
 
     try {
+      const expiresDate = new Date();
+      expiresDate.setDate(expiresDate.getDate() + invite.limit);
+
       const passwordHash = await this.bcryptService.hash(data.password);
       const createdUser = await this.userService.create({
         ...data,
         password: passwordHash,
+        isTrial: invite.limit != -1,
+        trialExpiresAt: expiresDate,
       });
 
-      await this.inviteService.remove(data.invite);
+      if (!invite.isGroup) {
+        await this.inviteService.remove(data.invite);
+      }
       const result = new RegisterSuccessResultDto();
       result.id = createdUser.id;
       result.role = createdUser.role;
@@ -74,7 +83,11 @@ export class AuthService {
 
   async login(data: LoginDto): Promise<LoginResultDto> {
     const foundUser = await this.userService.getUserByEmail(data.email);
-    if (foundUser?.banned) {
+    if (
+      foundUser &&
+      (foundUser.banned ||
+        (foundUser.isTrial && foundUser.trialExpiresAt < new Date()))
+    ) {
       const bannedResult = new LoginFailureResultDto();
       bannedResult.code = LoginErrors.UserBanned;
       bannedResult.message = 'This user is banned';

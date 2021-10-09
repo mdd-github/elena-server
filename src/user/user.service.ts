@@ -166,6 +166,8 @@ export class UserService {
     newUser.passwordHash = data.password;
     newUser.role = UserRoles.Employee;
     newUser.banned = false;
+    newUser.trialExpiresAt = data.trialExpiresAt;
+    newUser.isTrial = data.isTrial;
 
     return await this.usersRepository.save(newUser);
   }

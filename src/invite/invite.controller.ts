@@ -1,9 +1,9 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { IApplicationResponse } from '../common/application-response.interface';
 import { InviteService } from './invite.service';
-import { RemoveDto } from './dto/remove.dto';
 import { AdminRoleGuard } from '../auth/guards/role.guard';
 import { GetAllSuccessResultDto } from './dto/get-all-result.dto';
+import { GenerateDto } from './dto/generate.dto';
 
 @Controller('api/invite')
 @UseGuards(AdminRoleGuard)
@@ -28,7 +28,7 @@ export class InviteController {
     }
   }
 
-  @Post('create')
+  /*@Post('create')
   async create(): Promise<IApplicationResponse> {
     const invite = await this.inviteService.generate();
     return {
@@ -37,6 +37,23 @@ export class InviteController {
         value: invite,
       },
     };
+  }*/
+
+  @Post('generate')
+  async generate(
+    @Body() generateDto: GenerateDto,
+  ): Promise<IApplicationResponse> {
+    const result = await this.inviteService.generate2(generateDto);
+
+    return result.constructor.name == 'GenerateSuccessResultDto'
+      ? {
+          success: true,
+          payload: result,
+        }
+      : {
+          success: false,
+          payload: result,
+        };
   }
 
   @Post('remove/:invite')
