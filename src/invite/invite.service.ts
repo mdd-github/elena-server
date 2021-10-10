@@ -78,6 +78,10 @@ export class InviteService {
       return result;
     }
 
+    if(generateDto.value == null || generateDto.value == ''){
+      generateDto.value = uuid.v4().split('-')[0];
+    }
+
     const newInvite = new InviteEntity();
     newInvite.expiresAt = generateDto.expiresAt;
     newInvite.value = generateDto.value;
