@@ -5,6 +5,8 @@ export class GetInfoSuccessResultDto {
   lastName: string;
   email: string;
   banned: boolean;
+  isTrial: boolean;
+  trialBefore: Date;
 }
 
 export class GetInfoFailureResultDto {

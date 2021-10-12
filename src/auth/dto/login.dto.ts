@@ -30,6 +30,8 @@ export class LoginSuccessResultDto {
   role: string;
   token: string;
   refresh: string;
+  isTrial: boolean;
+  trialBefore: Date;
 }
 
 export class LoginFailureResultDto {

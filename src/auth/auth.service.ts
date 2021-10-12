@@ -116,6 +116,8 @@ export class AuthService {
     result.role = foundUser.role;
     result.token = token;
     result.refresh = session.id;
+    result.isTrial = foundUser.isTrial;
+    result.trialBefore = foundUser.trialExpiresAt;
     return result;
   }
 
@@ -133,6 +135,9 @@ export class AuthService {
       result.role = session.user.role;
       result.refresh = session.id;
       result.token = token;
+
+      result.isTrial = session.user.isTrial;
+      result.trialBefore = session.user.trialExpiresAt;
       return result;
     } catch (e) {
       switch (e.name) {

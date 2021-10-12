@@ -1,15 +1,15 @@
 import {
   Body,
   Controller,
-  Get,
+  Get, Logger,
   Param,
   Post,
   Put,
   UnauthorizedException,
   UploadedFile,
   UseGuards,
-  UseInterceptors,
-} from '@nestjs/common';
+  UseInterceptors
+} from "@nestjs/common";
 import { IApplicationResponse } from '../common/application-response.interface';
 import { UserService } from './user.service';
 import { UserRoles } from './user.entity';
@@ -193,14 +193,20 @@ export class UserController {
         };
   }
 
-  @Put('import')
+  @Put('csv')
   @UseGuards(AdminRoleGuard)
   @UseInterceptors(FileInterceptor('file'))
   async import(@UploadedFile() file: Express.Multer.File): Promise<void> {
     const data = file.buffer.toString('utf-8', 0, file.buffer.length);
+    console.log('Test');
+    console.log(file);
+    console.log(data);
+
     const s = new Readable();
 
     s.pipe(csv()).on('data', async (user) => {
+      console.log(user);
+
       try {
         const date = new Date();
         const partsOfDate = user.trial_before.split('/');
@@ -215,11 +221,13 @@ export class UserController {
           password: user.password,
           firstName: user.first_name,
           lastName: user.last_name,
-          isTrial: user.is_trial,
+          isTrial: user.is_trial === '1',
           trialExpiresAt: date,
           role: user.role,
         });
-      } catch (e) {}
+      } catch (e) {
+        console.log(e);
+      }
     });
     s._read = () => {};
     s.push(data);

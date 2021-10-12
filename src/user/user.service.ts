@@ -151,6 +151,8 @@ export class UserService {
     result.firstName = foundUser.firstName;
     result.lastName = foundUser.lastName;
     result.role = foundUser.role;
+    result.isTrial = foundUser.isTrial;
+    result.trialBefore = foundUser.trialExpiresAt;
     return result;
   }
 
