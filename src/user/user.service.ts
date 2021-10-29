@@ -3,7 +3,7 @@ import { UserEntity, UserRoles } from './user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserAlreadyExistError } from './errors/user-already-exist.error';
-import { Create2Dto, CreateDto } from "./dto/create.dto";
+import { Create2Dto, CreateDto } from './dto/create.dto';
 import {
   GetInfoFailureResultDto,
   GetInfoResultDto,
@@ -23,6 +23,12 @@ import {
 } from './dto/change-password.dto';
 import { SessionService } from '../session/session.service';
 import { BcryptService } from '../bcrypt/bcrypt.service';
+import {
+  ChangeExpirationDateDto,
+  ChangeExpirationDateErrors,
+  ChangeExpirationDateFailedDto,
+  ChangeExpirationDateSuccessDto,
+} from './dto/change-expiration-date.dto';
 
 @Injectable()
 export class UserService {
@@ -34,7 +40,12 @@ export class UserService {
   ) {}
 
   async removeById(id: number): Promise<void> {
-    await this.usersRepository.delete(id);
+    const user = await this.getUserById(id);
+
+    if (user) {
+      await this.sessionService.removeSessionOfUser(user);
+      await this.usersRepository.delete(id);
+    }
   }
 
   async banById(id: number): Promise<void> {
@@ -176,23 +187,39 @@ export class UserService {
     return await this.usersRepository.save(newUser);
   }
 
-  async create2(data: Create2Dto): Promise<UserEntity> {
-    const foundUser = await this.getUserByEmail(data.email);
+  async createOrUpdate(data: Create2Dto): Promise<UserEntity> {
+    let foundUser = await this.getUserByEmail(data.email);
 
-    if (!!foundUser) {
-      throw new UserAlreadyExistError();
+    if (!foundUser) {
+      foundUser = new UserEntity();
     }
 
-    const newUser = new UserEntity();
-    newUser.email = data.email.toLowerCase();
-    newUser.firstName = data.firstName;
-    newUser.lastName = data.lastName;
-    newUser.passwordHash = await this.bcryptService.hash(data.password);
-    newUser.role = data.role;
-    newUser.banned = false;
-    newUser.trialExpiresAt = data.trialExpiresAt;
-    newUser.isTrial = data.isTrial;
+    foundUser.email = data.email.toLowerCase();
+    foundUser.firstName = data.firstName;
+    foundUser.lastName = data.lastName;
+    foundUser.passwordHash = await this.bcryptService.hash(data.password);
+    foundUser.role = data.role;
+    foundUser.banned = false;
+    foundUser.trialExpiresAt = data.trialExpiresAt;
+    foundUser.isTrial = data.isTrial;
 
-    return await this.usersRepository.save(newUser);
+    return await this.usersRepository.save(foundUser);
+  }
+
+  async changeExpirationDate(data: ChangeExpirationDateDto) {
+    console.log(data.updateUserId);
+    const foundUser = await this.getUserById(data.updateUserId);
+
+    if (foundUser == null) {
+      const failed = new ChangeExpirationDateFailedDto();
+      failed.code = ChangeExpirationDateErrors.UserNotFound;
+      failed.message = 'User not found';
+      return failed;
+    }
+
+    foundUser.trialExpiresAt = data.newDate;
+    await this.usersRepository.save(foundUser);
+
+    return new ChangeExpirationDateSuccessDto();
   }
 }

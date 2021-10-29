@@ -1,15 +1,16 @@
 import {
   Body,
   Controller,
-  Get, Logger,
+  Get,
+  Logger,
   Param,
   Post,
   Put,
   UnauthorizedException,
   UploadedFile,
   UseGuards,
-  UseInterceptors
-} from "@nestjs/common";
+  UseInterceptors,
+} from '@nestjs/common';
 import { IApplicationResponse } from '../common/application-response.interface';
 import { UserService } from './user.service';
 import { UserRoles } from './user.entity';
@@ -28,6 +29,10 @@ import { log } from 'util';
 import * as fs from 'fs';
 import * as csv from 'csv-parser';
 import { Readable } from 'stream';
+import {
+  ChangeExpirationDateDto,
+  ChangeExpirationDateSuccessDto,
+} from './dto/change-expiration-date.dto';
 
 @Controller('api/user')
 export class UserController {
@@ -149,6 +154,26 @@ export class UserController {
         };
   }
 
+  @Post('change-expiration')
+  @UseGuards(AdminRoleGuard)
+  @UseInterceptors(ValidationInterceptor)
+  async changeExpirationDate(
+    @Body() body: ChangeExpirationDateDto,
+  ): Promise<IApplicationResponse> {
+    console.log(body);
+    const result = await this.userService.changeExpirationDate(body);
+
+    return result instanceof ChangeExpirationDateSuccessDto
+      ? {
+          success: true,
+          payload: result,
+        }
+      : {
+          success: false,
+          payload: result,
+        };
+  }
+
   @Get('all')
   @UseGuards(AdminRoleGuard)
   async getAll(): Promise<IApplicationResponse> {
@@ -216,7 +241,7 @@ export class UserController {
           date.setFullYear(partsOfDate[2]);
         }
 
-        await this.userService.create2({
+        await this.userService.createOrUpdate({
           email: user.email,
           password: user.password,
           firstName: user.first_name,
