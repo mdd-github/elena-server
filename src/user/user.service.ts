@@ -29,6 +29,15 @@ import {
   ChangeExpirationDateFailedDto,
   ChangeExpirationDateSuccessDto,
 } from './dto/change-expiration-date.dto';
+import {
+  ResetPasswordDto,
+  ResetPasswordFailedResultDto,
+  ResetPasswordResultDto,
+  ResetPasswordSucceedResultDto,
+} from './dto/reset-password.dto';
+import * as uuid from 'uuid';
+import { ConfigService } from '@nestjs/config';
+import * as nodemailer from 'nodemailer';
 
 @Injectable()
 export class UserService {
@@ -37,6 +46,7 @@ export class UserService {
     private readonly usersRepository: Repository<UserEntity>,
     private readonly sessionService: SessionService,
     private readonly bcryptService: BcryptService,
+    private readonly configService: ConfigService,
   ) {}
 
   async removeById(id: number): Promise<void> {
@@ -95,6 +105,50 @@ export class UserService {
     await this.usersRepository.save(user);
 
     return new ChangePasswordSucceedResultDto();
+  }
+
+  async resetPassword(body: ResetPasswordDto): Promise<ResetPasswordResultDto> {
+    const user = await this.getUserByEmail(body.email);
+
+    if (user == null) {
+      const failed = new ResetPasswordFailedResultDto();
+      failed.code = 100;
+      failed.message = 'User not found';
+      return failed;
+    }
+
+    const newPassword = uuid.v4().replace(/-/g, '');
+
+    await this.sessionService.removeSessionOfUser(user);
+    user.passwordHash = await this.bcryptService.hash(newPassword);
+    await this.usersRepository.save(user);
+    await this.sendPasswordToEmail(body.email, newPassword);
+
+    return new ResetPasswordSucceedResultDto();
+  }
+
+  async sendPasswordToEmail(email, password): Promise<void> {
+    const from = this.configService.get('APP_MAIL_USER');
+
+    const transporter = nodemailer.createTransport({
+      host: this.configService.get('APP_MAIL_SMTP_HOST'),
+      port: +this.configService.get<number>('APP_MAIL_SMTP_PORT'),
+      secure: this.configService.get<boolean>('APP_MAIL_SMTP_IS_SECURE'),
+      auth: {
+        user: from,
+        pass: this.configService.get('APP_MAIL_PASSWORD'),
+      },
+    });
+
+    const info = await transporter.sendMail({
+      from: from,
+      to: email,
+      subject: 'Сброс пароля',
+      html: `
+<h2>Пароль успешно сброшен</h2>
+<p>Здравствуйте,<br/> ваш пароль успешно сброшен.<br/> Новый пароль: <b>${password}</b></p>
+`,
+    });
   }
 
   async setRole(id: number, role: string): Promise<void> {

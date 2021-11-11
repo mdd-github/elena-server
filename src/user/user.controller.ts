@@ -2,11 +2,9 @@ import {
   Body,
   Controller,
   Get,
-  Logger,
   Param,
   Post,
   Put,
-  UnauthorizedException,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -18,21 +16,22 @@ import { AuthGuard } from '../auth/guards/auth.guard';
 import { GetInfoSuccessResultDto } from './dto/get-info-result.dto';
 import { GetAllSuccessResultDto } from './dto/get-all-result.dto';
 import { AdminRoleGuard } from '../auth/guards/role.guard';
-import { RemoveSuccessResultDto } from './dto/remove-result.dto';
 import {
   ChangePasswordDto,
   ChangePasswordSucceedResultDto,
 } from './dto/change-password.dto';
 import { ValidationInterceptor } from '../auth/interceptors/validation.interceptor';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { log } from 'util';
-import * as fs from 'fs';
 import * as csv from 'csv-parser';
 import { Readable } from 'stream';
 import {
   ChangeExpirationDateDto,
   ChangeExpirationDateSuccessDto,
 } from './dto/change-expiration-date.dto';
+import {
+  ResetPasswordDto,
+  ResetPasswordSucceedResultDto,
+} from './dto/reset-password.dto';
 
 @Controller('api/user')
 export class UserController {
@@ -144,6 +143,23 @@ export class UserController {
     const result = await this.userService.changePassword(body);
 
     return result instanceof ChangePasswordSucceedResultDto
+      ? {
+          success: true,
+          payload: result,
+        }
+      : {
+          success: false,
+          payload: result,
+        };
+  }
+
+  @Post('reset-password')
+  async resetPassword(
+    @Body() body: ResetPasswordDto,
+  ): Promise<IApplicationResponse> {
+    const result = await this.userService.resetPassword(body);
+
+    return result instanceof ResetPasswordSucceedResultDto
       ? {
           success: true,
           payload: result,
