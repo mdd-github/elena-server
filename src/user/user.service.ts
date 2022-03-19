@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  NotImplementedException,
+} from '@nestjs/common';
 import { UserEntity, UserRoles } from './user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -39,6 +43,7 @@ import * as uuid from 'uuid';
 import { ConfigService } from '@nestjs/config';
 import { EmailService } from '../email/email.service';
 import { IncorrectInviteError } from '../invite/errors/incorrect-invite.error';
+import { InviteService } from '../invite/invite.service';
 
 @Injectable()
 export class UserService {
@@ -49,6 +54,7 @@ export class UserService {
     private readonly bcryptService: BcryptService,
     private readonly configService: ConfigService,
     private readonly emailService: EmailService,
+    private readonly inviteService: InviteService,
   ) {}
 
   async removeById(id: number): Promise<void> {
@@ -220,6 +226,7 @@ export class UserService {
         throw new IncorrectInviteError();
       }
       invites.push(data.inviteId.toString());
+      foundUser.isTrial = data.isTrial;
       foundUser.trialExpiresAt = data.trialExpiresAt;
       foundUser.usedInvites = invites.join(';');
 
@@ -276,5 +283,40 @@ export class UserService {
     await this.usersRepository.save(foundUser);
 
     return new ChangeExpirationDateSuccessDto();
+  }
+
+  async applyInvite(userId: number, invite: string): Promise<UserEntity> {
+    const foundUser = await this.getUserById(userId);
+
+    if (!!foundUser && !foundUser.banned) {
+      const invites = foundUser.usedInvites?.split(';') || [];
+
+      const isInviteCorrect = await this.inviteService.check(invite);
+
+      if (!isInviteCorrect) {
+        throw new IncorrectInviteError();
+      }
+
+      const inviteEntity = await this.inviteService.getOne(invite);
+      if (
+        inviteEntity == null ||
+        invites.indexOf(inviteEntity.id.toString()) >= 0
+      ) {
+        throw new IncorrectInviteError();
+      }
+
+      const expiresDate = new Date();
+      expiresDate.setDate(expiresDate.getDate() + inviteEntity.limit);
+
+      invites.push(inviteEntity.id.toString());
+
+      foundUser.isTrial = inviteEntity.limit != -1;
+      foundUser.trialExpiresAt = expiresDate;
+      foundUser.usedInvites = invites.join(';');
+
+      return await this.usersRepository.save(foundUser);
+    } else {
+      throw new NotFoundException();
+    }
   }
 }

@@ -234,6 +234,33 @@ export class UserController {
         };
   }
 
+  @Get('apply-invite/:invite')
+  @UseGuards(AuthGuard)
+  async applyInvite(
+    @Body() body: { userId: number },
+    @Param('invite') invite: string,
+  ): Promise<IApplicationResponse> {
+    try {
+      const user = await this.userService.applyInvite(body.userId, invite);
+
+      delete user.email;
+      delete user.passwordHash;
+
+      return {
+        success: true,
+        payload: user,
+      };
+    } catch (e) {
+      return {
+        success: false,
+        payload: {
+          code: 1,
+          message: 'Incorrect Data',
+        },
+      };
+    }
+  }
+
   @Put('csv')
   @UseGuards(AdminRoleGuard)
   @UseInterceptors(FileInterceptor('file'))
