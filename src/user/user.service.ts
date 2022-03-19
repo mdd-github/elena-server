@@ -231,9 +231,7 @@ export class UserService {
       foundUser.usedInvites = invites.join(';');
 
       return await this.usersRepository.save(foundUser);
-    } else if (!!foundUser) {
-      throw new UserAlreadyExistError();
-    } else {
+    } else if(foundUser == null) {
       const newUser = new UserEntity();
       newUser.email = data.email.toLowerCase();
       newUser.firstName = data.firstName;
@@ -246,6 +244,8 @@ export class UserService {
       newUser.usedInvites = [data.inviteId.toString()].join(';');
 
       return await this.usersRepository.save(newUser);
+    } else {
+      throw new UserAlreadyExistError();
     }
   }
 
