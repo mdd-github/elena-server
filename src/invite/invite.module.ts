@@ -4,7 +4,7 @@ import { InviteController } from './invite.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { InviteEntity } from './invite.entity';
 import { AuthModule } from '../auth/auth.module';
-import { JsonWebTokenModule } from "../json-web-token/json-web-token.module";
+import { JsonWebTokenModule } from '../json-web-token/json-web-token.module';
 
 @Module({
   imports: [

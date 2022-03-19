@@ -12,8 +12,7 @@ export class RefreshSuccessResultDto {
   trialBefore: Date;
 }
 
-export class RefreshFailureResultDto {
-}
+export class RefreshFailureResultDto {}
 
 export type RefreshResultDto =
   | RefreshSuccessResultDto

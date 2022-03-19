@@ -78,7 +78,7 @@ export class InviteService {
       return result;
     }
 
-    if(generateDto.value == null || generateDto.value == ''){
+    if (generateDto.value == null || generateDto.value == '') {
       generateDto.value = uuid.v4().split('-')[0];
     }
 
