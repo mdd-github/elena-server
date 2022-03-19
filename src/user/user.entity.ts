@@ -50,4 +50,20 @@ export class UserEntity {
     default: false,
   })
   isTrial: boolean;
+
+  @Column({
+    name: 'used_invites',
+  })
+  usedInvites?: string;
+
+  @Column({
+    name: 'email_code',
+  })
+  emailCode: string;
+
+  @Column({
+    name: 'email_confirmed',
+    default: false,
+  })
+  emailConfirmed: boolean;
 }

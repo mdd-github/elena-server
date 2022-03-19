@@ -28,6 +28,7 @@ import {
 } from './dto/refresh.dto';
 import { INCORRECT_SESSION_ERROR } from '../session/errors/incorrect-session.error';
 import { SESSION_EXPIRED_ERROR } from '../session/errors/session-expired.error';
+import { INCORRECT_INVITE_ERROR } from '../invite/errors/incorrect-invite.error';
 
 @Injectable()
 export class AuthService {
@@ -59,6 +60,7 @@ export class AuthService {
         password: passwordHash,
         isTrial: invite.limit != -1,
         trialExpiresAt: expiresDate,
+        inviteId: invite.id,
       });
 
       if (!invite.isGroup) {
@@ -75,6 +77,9 @@ export class AuthService {
           result.code = RegisterErrors.UserAlreadyExist;
           result.message = e.message;
           return result;
+        case INCORRECT_INVITE_ERROR:
+          result.code = RegisterErrors.IncorrectInvite;
+          result.message = e.message;
         default:
           throw e;
       }
@@ -83,11 +88,7 @@ export class AuthService {
 
   async login(data: LoginDto): Promise<LoginResultDto> {
     const foundUser = await this.userService.getUserByEmail(data.email);
-    if (
-      foundUser &&
-      (foundUser.banned ||
-        (foundUser.isTrial && foundUser.trialExpiresAt < new Date()))
-    ) {
+    if (foundUser && foundUser.banned) {
       const bannedResult = new LoginFailureResultDto();
       bannedResult.code = LoginErrors.UserBanned;
       bannedResult.message = 'This user is banned';

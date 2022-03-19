@@ -2,6 +2,7 @@ export interface CreateDto {
   email: string;
   password: string;
   invite: string;
+  inviteId: number;
 
   firstName: string;
   lastName: string;

@@ -38,6 +38,7 @@ import {
 import * as uuid from 'uuid';
 import { ConfigService } from '@nestjs/config';
 import { EmailService } from '../email/email.service';
+import { IncorrectInviteError } from '../invite/errors/incorrect-invite.error';
 
 @Injectable()
 export class UserService {
@@ -212,21 +213,33 @@ export class UserService {
   async create(data: CreateDto): Promise<UserEntity> {
     const foundUser = await this.getUserByEmail(data.email);
 
-    if (!!foundUser) {
+    if (!!foundUser && !foundUser.banned) {
+      const invites = foundUser.usedInvites?.split(';') || [];
+
+      if (invites.indexOf(data.inviteId.toString()) >= 0) {
+        throw new IncorrectInviteError();
+      }
+      invites.push(data.inviteId.toString());
+      foundUser.trialExpiresAt = data.trialExpiresAt;
+      foundUser.usedInvites = invites.join(';');
+
+      return await this.usersRepository.save(foundUser);
+    } else if (!!foundUser) {
       throw new UserAlreadyExistError();
+    } else {
+      const newUser = new UserEntity();
+      newUser.email = data.email.toLowerCase();
+      newUser.firstName = data.firstName;
+      newUser.lastName = data.lastName;
+      newUser.passwordHash = data.password;
+      newUser.role = UserRoles.Employee;
+      newUser.banned = false;
+      newUser.trialExpiresAt = data.trialExpiresAt;
+      newUser.isTrial = data.isTrial;
+      newUser.usedInvites = [data.inviteId.toString()].join(';');
+
+      return await this.usersRepository.save(newUser);
     }
-
-    const newUser = new UserEntity();
-    newUser.email = data.email.toLowerCase();
-    newUser.firstName = data.firstName;
-    newUser.lastName = data.lastName;
-    newUser.passwordHash = data.password;
-    newUser.role = UserRoles.Employee;
-    newUser.banned = false;
-    newUser.trialExpiresAt = data.trialExpiresAt;
-    newUser.isTrial = data.isTrial;
-
-    return await this.usersRepository.save(newUser);
   }
 
   async createOrUpdate(data: Create2Dto): Promise<UserEntity> {
