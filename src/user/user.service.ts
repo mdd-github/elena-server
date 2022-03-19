@@ -229,6 +229,8 @@ export class UserService {
       foundUser.isTrial = data.isTrial;
       foundUser.trialExpiresAt = data.trialExpiresAt;
       foundUser.usedInvites = invites.join(';');
+      foundUser.emailCode = '';
+      foundUser.emailConfirmed = false;
 
       return await this.usersRepository.save(foundUser);
     } else if(foundUser == null) {
@@ -242,6 +244,8 @@ export class UserService {
       newUser.trialExpiresAt = data.trialExpiresAt;
       newUser.isTrial = data.isTrial;
       newUser.usedInvites = [data.inviteId.toString()].join(';');
+      newUser.emailCode = '';
+      newUser.emailConfirmed = false;
 
       return await this.usersRepository.save(newUser);
     } else {
@@ -264,6 +268,7 @@ export class UserService {
     foundUser.banned = false;
     foundUser.trialExpiresAt = data.trialExpiresAt;
     foundUser.isTrial = data.isTrial;
+
 
     return await this.usersRepository.save(foundUser);
   }
