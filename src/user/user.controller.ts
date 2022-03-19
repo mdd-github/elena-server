@@ -270,7 +270,9 @@ export class UserController {
         console.log(e);
       }
     });
-    s._read = () => {};
+    s._read = () => {
+      console.log('csv read');
+    };
     s.push(data);
   }
 }

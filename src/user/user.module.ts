@@ -8,6 +8,7 @@ import { AuthModule } from '../auth/auth.module';
 import { JsonWebTokenModule } from '../json-web-token/json-web-token.module';
 import { SessionModule } from '../session/session.module';
 import { BcryptModule } from '../bcrypt/bcrypt.module';
+import { EmailModule } from '../email/email.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { BcryptModule } from '../bcrypt/bcrypt.module';
     JsonWebTokenModule,
     SessionModule,
     BcryptModule,
+    EmailModule,
   ],
   providers: [UserService],
   controllers: [UserController],

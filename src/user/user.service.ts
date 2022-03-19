@@ -37,7 +37,7 @@ import {
 } from './dto/reset-password.dto';
 import * as uuid from 'uuid';
 import { ConfigService } from '@nestjs/config';
-import * as nodemailer from 'nodemailer';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class UserService {
@@ -47,6 +47,7 @@ export class UserService {
     private readonly sessionService: SessionService,
     private readonly bcryptService: BcryptService,
     private readonly configService: ConfigService,
+    private readonly emailService: EmailService,
   ) {}
 
   async removeById(id: number): Promise<void> {
@@ -128,27 +129,14 @@ export class UserService {
   }
 
   async sendPasswordToEmail(email, password): Promise<void> {
-    const from = this.configService.get('APP_MAIL_USER');
-
-    const transporter = nodemailer.createTransport({
-      host: this.configService.get('APP_MAIL_SMTP_HOST'),
-      port: +this.configService.get<number>('APP_MAIL_SMTP_PORT'),
-      secure: this.configService.get<boolean>('APP_MAIL_SMTP_IS_SECURE'),
-      auth: {
-        user: from,
-        pass: this.configService.get('APP_MAIL_PASSWORD'),
-      },
-    });
-
-    const info = await transporter.sendMail({
-      from: from,
-      to: email,
-      subject: 'Сброс пароля',
-      html: `
+    await this.emailService.send(
+      email,
+      'Сброс пароля',
+      `
 <h2>Пароль успешно сброшен</h2>
 <p>Здравствуйте,<br/> ваш пароль успешно сброшен.<br/> Новый пароль: <b>${password}</b></p>
 `,
-    });
+    );
   }
 
   async setRole(id: number, role: string): Promise<void> {
