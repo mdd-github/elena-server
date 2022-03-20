@@ -32,6 +32,7 @@ export class LoginSuccessResultDto {
   refresh: string;
   isTrial: boolean;
   trialBefore: Date;
+  emailConfirmed: boolean;
 }
 
 export class LoginFailureResultDto {

@@ -10,6 +10,7 @@ export class RefreshSuccessResultDto {
   refresh: string;
   isTrial: boolean;
   trialBefore: Date;
+  emailConfirmed: boolean;
 }
 
 export class RefreshFailureResultDto {}

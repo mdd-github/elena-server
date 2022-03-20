@@ -119,6 +119,7 @@ export class AuthService {
     result.refresh = session.id;
     result.isTrial = foundUser.isTrial;
     result.trialBefore = foundUser.trialExpiresAt;
+    result.emailConfirmed = foundUser.emailConfirmed;
     return result;
   }
 
@@ -139,6 +140,7 @@ export class AuthService {
 
       result.isTrial = session.user.isTrial;
       result.trialBefore = session.user.trialExpiresAt;
+      result.emailConfirmed = session.user.emailConfirmed;
       return result;
     } catch (e) {
       switch (e.name) {
