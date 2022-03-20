@@ -9,7 +9,7 @@ import { JsonWebTokenModule } from '../json-web-token/json-web-token.module';
 import { SessionModule } from '../session/session.module';
 import { BcryptModule } from '../bcrypt/bcrypt.module';
 import { EmailModule } from '../email/email.module';
-import { InviteModule } from "../invite/invite.module";
+import { InviteModule } from '../invite/invite.module';
 
 @Module({
   imports: [
@@ -19,7 +19,7 @@ import { InviteModule } from "../invite/invite.module";
     SessionModule,
     BcryptModule,
     EmailModule,
-    InviteModule
+    InviteModule,
   ],
   providers: [UserService],
   controllers: [UserController],

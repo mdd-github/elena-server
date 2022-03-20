@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  NotImplementedException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserEntity, UserRoles } from './user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -233,7 +229,7 @@ export class UserService {
       foundUser.emailConfirmed = false;
 
       return await this.usersRepository.save(foundUser);
-    } else if(foundUser == null) {
+    } else if (foundUser == null) {
       const newUser = new UserEntity();
       newUser.email = data.email.toLowerCase();
       newUser.firstName = data.firstName;
@@ -268,7 +264,6 @@ export class UserService {
     foundUser.banned = false;
     foundUser.trialExpiresAt = data.trialExpiresAt;
     foundUser.isTrial = data.isTrial;
-
 
     return await this.usersRepository.save(foundUser);
   }
@@ -323,5 +318,40 @@ export class UserService {
     } else {
       throw new NotFoundException();
     }
+  }
+
+  async sendConfirmation(userId: number): Promise<void> {
+    const foundUser = await this.getUserById(userId);
+    if (!!foundUser) {
+      foundUser.emailConfirmed = false;
+      foundUser.emailCode = uuid.v4().toString();
+
+      const link = `https://matrix.titovasvetlana.ru/api/user/confirm-email/${foundUser.id}/${foundUser.emailCode}`;
+
+      await this.usersRepository.save(foundUser);
+
+      await this.emailService.send(
+        foundUser.email,
+        'Подтверждение аккаунта',
+        `
+<h2>Здравствуйте, ${foundUser.firstName}</h2>
+<p>Подтвердите ваш аккаунт на https://matrix.titovasveltana.ru<br/> Ссылка для подтверждения: <b>${link}</b></p>
+      `,
+      );
+    }
+  }
+
+  async confirmEmail(userId: number, guid: string) {
+    const user = await this.getUserById(userId);
+
+    if (!!user && user.emailCode == guid) {
+      user.emailCode = '';
+      user.emailConfirmed = true;
+      this.usersRepository.save(user);
+
+      return true;
+    }
+
+    return false;
   }
 }

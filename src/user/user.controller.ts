@@ -5,10 +5,11 @@ import {
   Param,
   Post,
   Put,
+  Query, Res,
   UploadedFile,
   UseGuards,
-  UseInterceptors,
-} from '@nestjs/common';
+  UseInterceptors
+} from "@nestjs/common";
 import { IApplicationResponse } from '../common/application-response.interface';
 import { UserService } from './user.service';
 import { UserRoles } from './user.entity';
@@ -32,6 +33,7 @@ import {
   ResetPasswordDto,
   ResetPasswordSucceedResultDto,
 } from './dto/reset-password.dto';
+import { Response } from "express";
 
 @Controller('api/user')
 export class UserController {
@@ -261,20 +263,37 @@ export class UserController {
     }
   }
 
+  @Post('send-confirmation')
+  @UseGuards(AuthGuard)
+  async sendConfirmation(
+    @Body() body: { userId: number },
+  ): Promise<IApplicationResponse> {
+    await this.userService.sendConfirmation(body.userId);
+    return {
+      success: true,
+      payload: {},
+    };
+  }
+
+  @Get('confirm-email/:id/:guid')
+  async confirmEmail(
+    @Param('guid') guid: string,
+    @Param('id') id: number,
+    @Res() res: Response,
+  ): Promise<void> {
+    const result = await this.userService.confirmEmail(id, guid);
+
+    res.redirect('https://matrix.titovasvetlana.ru/confirmed');
+  }
+
   @Put('csv')
   @UseGuards(AdminRoleGuard)
   @UseInterceptors(FileInterceptor('file'))
   async import(@UploadedFile() file: Express.Multer.File): Promise<void> {
     const data = file.buffer.toString('utf-8', 0, file.buffer.length);
-    console.log('Test');
-    console.log(file);
-    console.log(data);
-
     const s = new Readable();
 
     s.pipe(csv()).on('data', async (user) => {
-      console.log(user);
-
       try {
         const date = new Date();
         const partsOfDate = user.trial_before.split('/');
