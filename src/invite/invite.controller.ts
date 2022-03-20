@@ -28,6 +28,17 @@ export class InviteController {
     }
   }
 
+  @Post('remove-expired')
+  @UseGuards(AdminRoleGuard)
+  async removeExpired(): Promise<IApplicationResponse> {
+    await this.inviteService.removeExpired();
+
+    return {
+      success: true,
+      payload: null,
+    };
+  }
+
   /*@Post('create')
   async create(): Promise<IApplicationResponse> {
     const invite = await this.inviteService.generate();

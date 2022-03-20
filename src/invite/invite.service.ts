@@ -1,7 +1,7 @@
 import { Body, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as uuid from 'uuid';
-import { Repository } from 'typeorm';
+import { LessThan, Repository } from 'typeorm';
 import { InviteEntity } from './invite.entity';
 import {
   GetAllFailureResultDto,
@@ -110,5 +110,15 @@ export class InviteService {
     });
 
     return foundInvite != null && foundInvite.expiresAt > new Date();
+  }
+
+  async removeExpired() {
+    const invites = await this.invitesRepository.find({
+      where: {
+        expiresAt: LessThan(new Date()),
+      },
+    });
+
+    await this.invitesRepository.remove(invites);
   }
 }
