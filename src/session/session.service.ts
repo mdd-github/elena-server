@@ -58,7 +58,8 @@ export class SessionService {
   }
 
   async remove(session: string): Promise<void> {
-    await this.sessionsRepository.delete(session);
+    const sessionEntity = await this.sessionsRepository.findOne(session);
+    await this.sessionsRepository.remove(sessionEntity);
   }
 
   async refresh(data: RefreshDto): Promise<SessionEntity> {

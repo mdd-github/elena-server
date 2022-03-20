@@ -2,14 +2,15 @@ import {
   Body,
   Controller,
   Get,
+  HttpService,
   Param,
   Post,
   Put,
-  Query, Res,
+  Res,
   UploadedFile,
   UseGuards,
-  UseInterceptors
-} from "@nestjs/common";
+  UseInterceptors,
+} from '@nestjs/common';
 import { IApplicationResponse } from '../common/application-response.interface';
 import { UserService } from './user.service';
 import { UserRoles } from './user.entity';
@@ -33,11 +34,15 @@ import {
   ResetPasswordDto,
   ResetPasswordSucceedResultDto,
 } from './dto/reset-password.dto';
-import { Response } from "express";
+import { Response } from 'express';
+import * as fs from 'fs';
 
 @Controller('api/user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly httpService: HttpService,
+  ) {}
 
   @Post('set-role/:id/:role')
   @UseGuards(AdminRoleGuard)
@@ -320,5 +325,20 @@ export class UserController {
       console.log('csv read');
     };
     s.push(data);
+  }
+
+  @Get('export-csv')
+  async downloadImage(@Res() res) {
+    const writer = fs.createWriteStream('./image.png');
+    const response = await this.httpService.axiosRef({
+      url: 'https://habrastorage.org/webt/5b/9d/26/5b9d26a55636e456583070.png',
+      method: 'GET',
+      responseType: 'stream',
+    });
+    response.data.pipe(writer);
+    return new Promise((resolve, reject) => {
+      writer.on('finish', resolve);
+      writer.on('error', reject);
+    });
   }
 }

@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { forwardRef, HttpModule, Module } from "@nestjs/common";
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { UserService } from './user.service';
@@ -20,6 +20,7 @@ import { InviteModule } from '../invite/invite.module';
     BcryptModule,
     EmailModule,
     InviteModule,
+    HttpModule,
   ],
   providers: [UserService],
   controllers: [UserController],
